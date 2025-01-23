@@ -45,7 +45,7 @@
         const messages = [
             {
                 text: "Olá!\n\nPrepare para viver o extraordinário na melhor cidade do Brasil para se viver, tendo a qualidade de vida que só um condomínio fechado proporciona para você e sua família.\n\nO lançamento da segunda fase dos lotes de terrenos no Vivá Home Resort que será entregue ainda esse ano, está gerando bastante expectativa. Se você se interessar, posso ajudar com informações sobre preços e localização. Fique à vontade para perguntar!",
-                imageUrl: "1.jpg"
+                imageUrl: "1.jpg" // A imagem estará na raiz do diretório
             },
             {
                 text: "Olá!\n\nEssa semana estou com condições especiais e com facilidades de pagamento. Se você estiver interessado, posso ajudar com informações sobre os lotes disponíveis, e quais são essas condições especiais.\n\nPosso te passar mais informações?",
@@ -71,10 +71,13 @@
         function shareOnWhatsApp(index) {
             const message = messages[index];
             const encodedText = encodeURIComponent(message.text);
-            const encodedImage = encodeURIComponent(message.imageUrl);
+            
+            // Aqui ajustamos para construir a URL completa com o domínio (supondo 'https://seusite.com')
+            const baseUrl = "https://granadoimoveis.vercel.app/"; // Substitua por seu domínio real
+            const encodedImage = encodeURIComponent(baseUrl + message.imageUrl); // Adiciona o domínio à imagem
 
             // Criar o link de compartilhamento para WhatsApp
-            const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedText}%0A%0AImagem:%20${encodedImage}`;
+            const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedText}%0A%0A${encodedImage}`;
 
             // Abrir o link no WhatsApp
             window.open(whatsappUrl, '_blank');
