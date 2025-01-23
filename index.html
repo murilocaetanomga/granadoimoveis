@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exportar para Word</title>
+    <title>Compartilhar no WhatsApp</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -18,8 +18,13 @@
             padding: 15px;
             border-radius: 8px;
         }
+        img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 10px;
+        }
         button {
-            background-color: #4CAF50;
+            background-color: #25D366;
             color: white;
             border: none;
             padding: 10px 20px;
@@ -56,40 +61,26 @@
             const container = document.createElement('div');
             container.className = 'message-container';
             container.innerHTML = `
+                <img src="${message.imageUrl}" alt="Imagem ${index + 1}">
                 <p>${message.text}</p>
-                <img src="${message.imageUrl}" alt="Imagem ${index + 1}" style="max-width: 100%; height: auto;">
-                <button onclick="exportToWord(${index})">Exportar para Word</button>
+                <button onclick="shareOnWhatsApp(${index})">Compartilhar no WhatsApp</button>
             `;
             return container;
         }
 
-        function exportToWord(index) {
+        function shareOnWhatsApp(index) {
             const message = messages[index];
+            const encodedText = encodeURIComponent(message.text);
+            const encodedImage = encodeURIComponent(message.imageUrl);
 
-            // Criar o conteúdo em formato HTML para o arquivo Word
-            const htmlContent = `
-                <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
-                <head><meta charset="utf-8"></head>
-                <body>
-                    <p>${message.text.replace(/\n/g, "<br>")}</p>
-                    <img src="${message.imageUrl}" style="max-width:100%; height:auto;">
-                </body>
-                </html>
-            `;
+            // Criar o link de compartilhamento para WhatsApp
+            const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedText}%0A%0AImagem:%20${encodedImage}`;
 
-            // Criar um blob com o conteúdo HTML
-            const blob = new Blob(['\ufeff', htmlContent], {
-                type: 'application/msword'
-            });
-
-            // Criar um link para download
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `mensagem-${index + 1}.doc`;
-            link.click();
+            // Abrir o link no WhatsApp
+            window.open(whatsappUrl, '_blank');
         }
 
-        // Renderizar as mensagens
+        // Renderizar mensagens
         const messagesContainer = document.getElementById('messages');
         messages.forEach((message, index) => {
             messagesContainer.appendChild(createMessageElement(message, index));
