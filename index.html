@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIVA Message Sharing</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .message-container {
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 10px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        #copyFeedback {
+            color: green;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="messages"></div>
+    <div id="copyFeedback"></div>
+
+    <script>
+        const messages = [
+            {
+                text: "Olá!\n\nPrepare para viver o extraordinário na melhor cidade do Brasil para se viver, tendo a qualidade de vida que só um condomínio fechado proporciona para você e sua família.\n\nO lançamento da segunda fase dos lotes de terrenos no Vivá Home Resort que será entregue ainda esse ano, está gerando bastante expectativa. Se você se interessar, posso ajudar com informações sobre preços e localização. Fique à vontade para perguntar!",
+                imageUrl: "1.jpg"
+            },
+            {
+                text: "Olá!\n\nEssa semana estou com condições especiais e com facilidades de pagamento. Se você estiver interessado, posso ajudar com informações sobre os lotes disponíveis, e quais são essas condições especiais.\n\nPosso te passar mais informações?",
+                imageUrl: "https://example.com/image2.jpg"
+            },
+            {
+                text: "Olá! 😊\n\nTentei entrar em contato com você, mas não consegui. Para garantir que possa atender suas necessidades da melhor forma possível, vou encerrar este atendimento por enquanto.\n\nSe precisar de ajuda no futuro, não hesite em me procurar! Estarei sempre aqui para ajudar.\n\nAgradeço pela sua compreensão e desejo um ótimo dia!",
+                imageUrl: "https://example.com/image3.jpg"
+            }
+        ];
+
+        function createMessageElement(message, index) {
+            const container = document.createElement('div');
+            container.className = 'message-container';
+            container.innerHTML = `
+                <img src="${message.imageUrl}" alt="Imagem ${index + 1}">
+                <p>${message.text}</p>
+                <button onclick="copyMessage(${index})">Copiar Mensagem</button>
+            `;
+            return container;
+        }
+
+        async function copyMessage(index) {
+            const message = messages[index];
+            
+            // Copy text to clipboard
+            try {
+                await navigator.clipboard.writeText(message.text);
+            } catch (err) {
+                console.error('Failed to copy text', err);
+            }
+
+            // Try to fetch and copy image
+            try {
+                const response = await fetch(message.imageUrl);
+                if (!response.ok) {
+                    throw new Error('Image fetch failed');
+                }
+                const blob = await response.blob();
+                await navigator.clipboard.write([
+                    new ClipboardItem({
+                        'image/jpeg': blob
+                    })
+                ]);
+            } catch (err) {
+                console.error('Failed to copy image', err);
+            }
+
+            // Show feedback
+            const feedbackEl = document.getElementById('copyFeedback');
+            feedbackEl.textContent = 'Mensagem copiada!';
+            setTimeout(() => {
+                feedbackEl.textContent = '';
+            }, 2000);
+        }
+
+        // Render messages
+        const messagesContainer = document.getElementById('messages');
+        messages.forEach((message, index) => {
+            messagesContainer.appendChild(createMessageElement(message, index));
+        });
+    </script>
+</body>
+</html>
