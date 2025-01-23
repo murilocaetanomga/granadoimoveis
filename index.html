@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIVA Message Sharing</title>
+    <title>Copiar Mensagens</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -68,16 +68,28 @@
             container.innerHTML = `
                 <img src="${message.imageUrl}" alt="Imagem ${index + 1}">
                 <p>${message.text}</p>
-                <button onclick="copyToWhatsApp(${index})">Enviar para WhatsApp</button>
+                <button onclick="copyMessage(${index})">Copiar Mensagem e Imagem</button>
             `;
             return container;
         }
 
-        function copyToWhatsApp(index) {
+        async function copyMessage(index) {
             const message = messages[index];
-            const fullMessage = `${message.text}\n\nVeja a imagem aqui: ${message.imageUrl}`;
-            const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(fullMessage)}`;
-            window.open(whatsappUrl, '_blank');
+            const combinedContent = `${message.text}\n\nImagem: ${message.imageUrl}`;
+
+            try {
+                await navigator.clipboard.writeText(combinedContent);
+
+                // Feedback para o usuário
+                const feedbackEl = document.getElementById('copyFeedback');
+                feedbackEl.textContent = 'Mensagem e link da imagem copiados!';
+                setTimeout(() => {
+                    feedbackEl.textContent = '';
+                }, 2000);
+            } catch (err) {
+                console.error('Erro ao copiar a mensagem:', err);
+                alert('Não foi possível copiar a mensagem. Tente novamente.');
+            }
         }
 
         // Render messages
