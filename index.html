@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Copiar Mensagens</title>
+    <title>Copiar Mensagem com Imagem</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -75,20 +75,32 @@
 
         async function copyMessage(index) {
             const message = messages[index];
-            const combinedContent = `${message.text}\n\nImagem: ${message.imageUrl}`;
-
             try {
-                await navigator.clipboard.writeText(combinedContent);
+                // Fetch the image as a Blob
+                const response = await fetch(message.imageUrl);
+                if (!response.ok) throw new Error("Não foi possível carregar a imagem.");
+                const imageBlob = await response.blob();
+
+                // Cria um ClipboardItem com texto e imagem
+                const clipboardItems = [
+                    new ClipboardItem({
+                        'text/plain': new Blob([message.text], { type: 'text/plain' }),
+                        [imageBlob.type]: imageBlob
+                    })
+                ];
+
+                // Copia o conteúdo para a área de transferência
+                await navigator.clipboard.write(clipboardItems);
 
                 // Feedback para o usuário
                 const feedbackEl = document.getElementById('copyFeedback');
-                feedbackEl.textContent = 'Mensagem e link da imagem copiados!';
+                feedbackEl.textContent = 'Mensagem e imagem copiadas!';
                 setTimeout(() => {
                     feedbackEl.textContent = '';
                 }, 2000);
             } catch (err) {
-                console.error('Erro ao copiar a mensagem:', err);
-                alert('Não foi possível copiar a mensagem. Tente novamente.');
+                console.error('Erro ao copiar:', err);
+                alert('Não foi possível copiar a mensagem e a imagem. Verifique se seu navegador suporta essa funcionalidade.');
             }
         }
 
