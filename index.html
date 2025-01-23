@@ -69,7 +69,7 @@
                 <img src="${message.imageUrl}" alt="Imagem ${index + 1}">
                 <p>${message.text}</p>
                 <button onclick="copyText(${index})">Copiar Texto</button>
-                <button onclick="copyImage(${index})">Copiar Imagem</button>
+                <button onclick="downloadImage(${index})">Baixar Imagem</button>
             `;
             return container;
         }
@@ -85,15 +85,14 @@
             showCopyStatus('Texto copiado com sucesso!');
         }
 
-        function copyImage(index) {
+        function downloadImage(index) {
             const message = messages[index];
-            const textArea = document.createElement('textarea');
-            textArea.value = message.imageUrl;
-            document.body.appendChild(textArea);
-            textArea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textArea);
-            showCopyStatus('Link da imagem copiado com sucesso!');
+            const link = document.createElement('a');
+            link.href = message.imageUrl;
+            link.download = message.imageUrl.split('/').pop(); // Pega o nome do arquivo da URL
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         function showCopyStatus(message) {
