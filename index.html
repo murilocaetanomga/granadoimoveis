@@ -36,29 +36,67 @@
             cursor: pointer;
             border-radius: 4px;
         }
-        #copy-status {
-            margin-top: 10px;
-            color: green;
+        #copy-status, #modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: visibility 0s, opacity 0.3s;
+        }
+        #copy-status.active, #modal.active {
+            visibility: visible;
+            opacity: 1;
+        }
+        #modal button {
+            background-color: #fff;
+            color: #25D366;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        @media (max-width: 480px) {
+            button {
+                font-size: 14px;
+                padding: 8px 16px;
+            }
         }
     </style>
 </head>
 <body>
     <div id="messages"></div>
+
+    <!-- Notificação -->
     <div id="copy-status"></div>
+
+    <!-- Modal -->
+    <div id="modal">
+        <p>Toque e segure na imagem para salvá-la na galeria.</p>
+        <button onclick="closeModal()">Fechar</button>
+    </div>
 
     <script>
         const messages = [
             {
                 text: "Olá!\n\nPrepare para viver o extraordinário na melhor cidade do Brasil para se viver, tendo a qualidade de vida que só um condomínio fechado proporciona para você e sua família.\n\nO lançamento da segunda fase dos lotes de terrenos no Vivá Home Resort que será entregue ainda esse ano, está gerando bastante expectativa. Se você se interessar, posso ajudar com informações sobre preços e localização. Fique à vontade para perguntar!",
-                imageUrl: "1.jpg" // Adicione o domínio correto
+                imageUrl: "https://seusite.com/1.jpg" // Adicione o domínio correto
             },
             {
                 text: "Olá!\n\nEssa semana estou com condições especiais e com facilidades de pagamento. Se você estiver interessado, posso ajudar com informações sobre os lotes disponíveis, e quais são essas condições especiais.\n\nPosso te passar mais informações?",
-                imageUrl: "2.jpg"
+                imageUrl: "https://via.placeholder.com/600x300.png?text=Exemplo+2"
             },
             {
                 text: "Olá! 😊\n\nTentei entrar em contato com você, mas não consegui. Para garantir que possa atender suas necessidades da melhor forma possível, vou encerrar este atendimento por enquanto.\n\nSe precisar de ajuda no futuro, não hesite em me procurar! Estarei sempre aqui para ajudar.\n\nAgradeço pela sua compreensão e desejo um ótimo dia!",
-                imageUrl: "3.jpg"
+                imageUrl: "https://via.placeholder.com/600x300.png?text=Exemplo+3"
             }
         ];
 
@@ -68,8 +106,8 @@
             container.innerHTML = `
                 <img src="${message.imageUrl}" alt="Imagem ${index + 1}">
                 <p>${message.text}</p>
-                <button onclick="copyText(${index})">Copiar Texto</button>
-                <button onclick="downloadImage(${index})">Baixar Imagem</button>
+                <button onclick="copyText(${index})">1. Copiar Texto</button>
+                <button onclick="openImageModal(${index})">2. Abrir/Salvar Imagem</button>
             `;
             return container;
         }
@@ -85,20 +123,28 @@
             showCopyStatus('Texto copiado com sucesso!');
         }
 
-        function downloadImage(index) {
+        function openImageModal(index) {
+            const modal = document.getElementById('modal');
+            modal.classList.add('active');
+
+            // Abrir a imagem em uma nova aba (para salvá-la)
             const message = messages[index];
-            const link = document.createElement('a');
-            link.href = message.imageUrl;
-            link.download = message.imageUrl.split('/').pop(); // Pega o nome do arquivo da URL
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            window.open(message.imageUrl, '_blank');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            modal.classList.remove('active');
         }
 
         function showCopyStatus(message) {
             const status = document.getElementById('copy-status');
             status.textContent = message;
-            setTimeout(() => status.textContent = '', 3000);
+            status.classList.add('active');
+            setTimeout(() => {
+                status.classList.remove('active');
+                status.textContent = '';
+            }, 3000);
         }
 
         // Renderizar mensagens
