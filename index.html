@@ -50,7 +50,7 @@
         const messages = [
             {
                 text: "Olá!\n\nPrepare para viver o extraordinário na melhor cidade do Brasil para se viver, tendo a qualidade de vida que só um condomínio fechado proporciona para você e sua família.\n\nO lançamento da segunda fase dos lotes de terrenos no Vivá Home Resort que será entregue ainda esse ano, está gerando bastante expectativa. Se você se interessar, posso ajudar com informações sobre preços e localização. Fique à vontade para perguntar!",
-                imageUrl: "1.jpg"
+                imageUrl: "https://example.com/1.jpg"
             },
             {
                 text: "Olá!\n\nEssa semana estou com condições especiais e com facilidades de pagamento. Se você estiver interessado, posso ajudar com informações sobre os lotes disponíveis, e quais são essas condições especiais.\n\nPosso te passar mais informações?",
@@ -68,43 +68,16 @@
             container.innerHTML = `
                 <img src="${message.imageUrl}" alt="Imagem ${index + 1}">
                 <p>${message.text}</p>
-                <button onclick="copyMessage(${index})">Copiar Mensagem</button>
+                <button onclick="copyToWhatsApp(${index})">Enviar para WhatsApp</button>
             `;
             return container;
         }
 
-        async function copyMessage(index) {
+        function copyToWhatsApp(index) {
             const message = messages[index];
-            
-            // Copy text to clipboard
-            try {
-                await navigator.clipboard.writeText(message.text);
-            } catch (err) {
-                console.error('Failed to copy text', err);
-            }
-
-            // Try to fetch and copy image
-            try {
-                const response = await fetch(message.imageUrl);
-                if (!response.ok) {
-                    throw new Error('Image fetch failed');
-                }
-                const blob = await response.blob();
-                await navigator.clipboard.write([
-                    new ClipboardItem({
-                        'image/jpeg': blob
-                    })
-                ]);
-            } catch (err) {
-                console.error('Failed to copy image', err);
-            }
-
-            // Show feedback
-            const feedbackEl = document.getElementById('copyFeedback');
-            feedbackEl.textContent = 'Mensagem copiada!';
-            setTimeout(() => {
-                feedbackEl.textContent = '';
-            }, 2000);
+            const fullMessage = `${message.text}\n\nVeja a imagem aqui: ${message.imageUrl}`;
+            const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(fullMessage)}`;
+            window.open(whatsappUrl, '_blank');
         }
 
         // Render messages
