@@ -36,7 +36,7 @@
             cursor: pointer;
             border-radius: 4px;
         }
-        #copy-status, #modal {
+        #copy-status, #image-modal {
             position: fixed;
             top: 0;
             left: 0;
@@ -54,15 +54,22 @@
             opacity: 0;
             transition: visibility 0s, opacity 0.3s;
         }
-        #copy-status.active, #modal.active {
+        #copy-status.active, #image-modal.active {
             visibility: visible;
             opacity: 1;
         }
-        #modal button {
+        #image-modal img {
+            max-width: 90%;
+            max-height: 70%;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        #image-modal button {
             background-color: #fff;
             color: #25D366;
             font-weight: bold;
-            margin-top: 20px;
+            padding: 10px 20px;
+            border-radius: 8px;
         }
         @media (max-width: 480px) {
             button {
@@ -78,10 +85,11 @@
     <!-- Notificação -->
     <div id="copy-status"></div>
 
-    <!-- Modal -->
-    <div id="modal">
+    <!-- Modal para exibir imagem -->
+    <div id="image-modal">
+        <img id="modal-image" src="" alt="Imagem para salvar">
         <p>Toque e segure na imagem para salvá-la na galeria.</p>
-        <button onclick="closeModal()">Fechar</button>
+        <button onclick="closeImageModal()">Fechar</button>
     </div>
 
     <script>
@@ -107,7 +115,7 @@
                 <img src="${message.imageUrl}" alt="Imagem ${index + 1}">
                 <p>${message.text}</p>
                 <button onclick="copyText(${index})">1. Copiar Texto</button>
-                <button onclick="openImageModal(${index})">2. Abrir/Salvar Imagem</button>
+                <button onclick="showImageModal(${index})">2. Abrir/Salvar Imagem</button>
             `;
             return container;
         }
@@ -123,17 +131,17 @@
             showCopyStatus('Texto copiado com sucesso!');
         }
 
-        function openImageModal(index) {
-            const modal = document.getElementById('modal');
-            modal.classList.add('active');
-
-            // Abrir a imagem em uma nova aba (para salvá-la)
+        function showImageModal(index) {
+            const modal = document.getElementById('image-modal');
+            const modalImage = document.getElementById('modal-image');
             const message = messages[index];
-            window.open(message.imageUrl, '_blank');
+
+            modalImage.src = message.imageUrl; // Define a imagem no modal
+            modal.classList.add('active');
         }
 
-        function closeModal() {
-            const modal = document.getElementById('modal');
+        function closeImageModal() {
+            const modal = document.getElementById('image-modal');
             modal.classList.remove('active');
         }
 
