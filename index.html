@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Copiar Mensagem</title>
+    <title>Copiar Texto e Imagem Juntos</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -50,15 +50,15 @@
         const messages = [
             {
                 text: "Olá!\n\nPrepare para viver o extraordinário na melhor cidade do Brasil para se viver, tendo a qualidade de vida que só um condomínio fechado proporciona para você e sua família.\n\nO lançamento da segunda fase dos lotes de terrenos no Vivá Home Resort que será entregue ainda esse ano, está gerando bastante expectativa. Se você se interessar, posso ajudar com informações sobre preços e localização. Fique à vontade para perguntar!",
-                imageUrl: "https://example.com/1.jpg"
+                imageUrl: "1.jpg"
             },
             {
                 text: "Olá!\n\nEssa semana estou com condições especiais e com facilidades de pagamento. Se você estiver interessado, posso ajudar com informações sobre os lotes disponíveis, e quais são essas condições especiais.\n\nPosso te passar mais informações?",
-                imageUrl: "https://example.com/image2.jpg"
+                imageUrl: "https://via.placeholder.com/600x300.png?text=Exemplo+2"
             },
             {
                 text: "Olá! 😊\n\nTentei entrar em contato com você, mas não consegui. Para garantir que possa atender suas necessidades da melhor forma possível, vou encerrar este atendimento por enquanto.\n\nSe precisar de ajuda no futuro, não hesite em me procurar! Estarei sempre aqui para ajudar.\n\nAgradeço pela sua compreensão e desejo um ótimo dia!",
-                imageUrl: "https://example.com/image3.jpg"
+                imageUrl: "https://via.placeholder.com/600x300.png?text=Exemplo+3"
             }
         ];
 
@@ -68,27 +68,57 @@
             container.innerHTML = `
                 <img src="${message.imageUrl}" alt="Imagem ${index + 1}">
                 <p>${message.text}</p>
-                <button onclick="copyText('${message.text}')">Copiar Texto</button>
-                <button onclick="openImage('${message.imageUrl}')">Abrir Imagem</button>
+                <button onclick="copyMessage(${index})">Copiar Mensagem e Imagem</button>
             `;
             return container;
         }
 
-        function copyText(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                const feedbackEl = document.getElementById('copyFeedback');
-                feedbackEl.textContent = 'Texto copiado!';
-                setTimeout(() => {
-                    feedbackEl.textContent = '';
-                }, 2000);
-            }).catch(err => {
-                console.error('Erro ao copiar texto:', err);
-                alert('Não foi possível copiar o texto.');
-            });
-        }
+        async function copyMessage(index) {
+            const message = messages[index];
 
-        function openImage(imageUrl) {
-            window.open(imageUrl, '_blank');
+            // Cria um canvas para combinar texto e imagem
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const image = new Image();
+
+            image.crossOrigin = 'anonymous'; // Permitir imagens externas
+            image.src = message.imageUrl;
+
+            image.onload = async () => {
+                // Definir o tamanho do canvas
+                canvas.width = image.width;
+                canvas.height = image.height + 150; // Espaço para o texto
+
+                // Desenhar a imagem no canvas
+                ctx.drawImage(image, 0, 0);
+
+                // Adicionar texto ao canvas
+                ctx.fillStyle = '#000';
+                ctx.font = '18px Arial';
+                const textLines = message.text.split('\n');
+                textLines.forEach((line, i) => {
+                    ctx.fillText(line, 10, image.height + 30 + i * 20);
+                });
+
+                // Converter o canvas para Blob (imagem)
+                canvas.toBlob(async (blob) => {
+                    try {
+                        await navigator.clipboard.write([
+                            new ClipboardItem({ 'image/png': blob })
+                        ]);
+
+                        // Feedback para o usuário
+                        const feedbackEl = document.getElementById('copyFeedback');
+                        feedbackEl.textContent = 'Mensagem e imagem copiadas!';
+                        setTimeout(() => {
+                            feedbackEl.textContent = '';
+                        }, 2000);
+                    } catch (err) {
+                        console.error('Erro ao copiar:', err);
+                        alert('Não foi possível copiar a mensagem e a imagem. Verifique se seu navegador suporta essa funcionalidade.');
+                    }
+                });
+            };
         }
 
         // Render messages
