@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Copiar Texto e Imagem Juntos</title>
+    <title>Exportar para Word</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -18,11 +18,6 @@
             padding: 15px;
             border-radius: 8px;
         }
-        img {
-            max-width: 100%;
-            height: auto;
-            margin-bottom: 10px;
-        }
         button {
             background-color: #4CAF50;
             color: white;
@@ -36,15 +31,10 @@
             cursor: pointer;
             border-radius: 4px;
         }
-        #copyFeedback {
-            color: green;
-            margin-top: 10px;
-        }
     </style>
 </head>
 <body>
     <div id="messages"></div>
-    <div id="copyFeedback"></div>
 
     <script>
         const messages = [
@@ -66,62 +56,40 @@
             const container = document.createElement('div');
             container.className = 'message-container';
             container.innerHTML = `
-                <img src="${message.imageUrl}" alt="Imagem ${index + 1}">
                 <p>${message.text}</p>
-                <button onclick="copyMessage(${index})">Copiar Mensagem e Imagem</button>
+                <img src="${message.imageUrl}" alt="Imagem ${index + 1}" style="max-width: 100%; height: auto;">
+                <button onclick="exportToWord(${index})">Exportar para Word</button>
             `;
             return container;
         }
 
-        async function copyMessage(index) {
+        function exportToWord(index) {
             const message = messages[index];
 
-            // Cria um canvas para combinar texto e imagem
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            const image = new Image();
+            // Criar o conteúdo em formato HTML para o arquivo Word
+            const htmlContent = `
+                <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+                <head><meta charset="utf-8"></head>
+                <body>
+                    <p>${message.text.replace(/\n/g, "<br>")}</p>
+                    <img src="${message.imageUrl}" style="max-width:100%; height:auto;">
+                </body>
+                </html>
+            `;
 
-            image.crossOrigin = 'anonymous'; // Permitir imagens externas
-            image.src = message.imageUrl;
+            // Criar um blob com o conteúdo HTML
+            const blob = new Blob(['\ufeff', htmlContent], {
+                type: 'application/msword'
+            });
 
-            image.onload = async () => {
-                // Definir o tamanho do canvas
-                canvas.width = image.width;
-                canvas.height = image.height + 150; // Espaço para o texto
-
-                // Desenhar a imagem no canvas
-                ctx.drawImage(image, 0, 0);
-
-                // Adicionar texto ao canvas
-                ctx.fillStyle = '#000';
-                ctx.font = '18px Arial';
-                const textLines = message.text.split('\n');
-                textLines.forEach((line, i) => {
-                    ctx.fillText(line, 10, image.height + 30 + i * 20);
-                });
-
-                // Converter o canvas para Blob (imagem)
-                canvas.toBlob(async (blob) => {
-                    try {
-                        await navigator.clipboard.write([
-                            new ClipboardItem({ 'image/png': blob })
-                        ]);
-
-                        // Feedback para o usuário
-                        const feedbackEl = document.getElementById('copyFeedback');
-                        feedbackEl.textContent = 'Mensagem e imagem copiadas!';
-                        setTimeout(() => {
-                            feedbackEl.textContent = '';
-                        }, 2000);
-                    } catch (err) {
-                        console.error('Erro ao copiar:', err);
-                        alert('Não foi possível copiar a mensagem e a imagem. Verifique se seu navegador suporta essa funcionalidade.');
-                    }
-                });
-            };
+            // Criar um link para download
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `mensagem-${index + 1}.doc`;
+            link.click();
         }
 
-        // Render messages
+        // Renderizar as mensagens
         const messagesContainer = document.getElementById('messages');
         messages.forEach((message, index) => {
             messagesContainer.appendChild(createMessageElement(message, index));
