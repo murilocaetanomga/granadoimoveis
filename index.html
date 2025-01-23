@@ -36,16 +36,21 @@
             cursor: pointer;
             border-radius: 4px;
         }
+        #copy-status {
+            margin-top: 10px;
+            color: green;
+        }
     </style>
 </head>
 <body>
     <div id="messages"></div>
+    <div id="copy-status"></div>
 
     <script>
         const messages = [
             {
                 text: "Olá!\n\nPrepare para viver o extraordinário na melhor cidade do Brasil para se viver, tendo a qualidade de vida que só um condomínio fechado proporciona para você e sua família.\n\nO lançamento da segunda fase dos lotes de terrenos no Vivá Home Resort que será entregue ainda esse ano, está gerando bastante expectativa. Se você se interessar, posso ajudar com informações sobre preços e localização. Fique à vontade para perguntar!",
-                imageUrl: "1.jpg" // A imagem estará na raiz do diretório
+                imageUrl: "1.jpg" // Adicione o domínio correto
             },
             {
                 text: "Olá!\n\nEssa semana estou com condições especiais e com facilidades de pagamento. Se você estiver interessado, posso ajudar com informações sobre os lotes disponíveis, e quais são essas condições especiais.\n\nPosso te passar mais informações?",
@@ -63,24 +68,38 @@
             container.innerHTML = `
                 <img src="${message.imageUrl}" alt="Imagem ${index + 1}">
                 <p>${message.text}</p>
-                <button onclick="shareOnWhatsApp(${index})">Compartilhar no WhatsApp</button>
+                <button onclick="copyText(${index})">Copiar Texto</button>
+                <button onclick="copyImage(${index})">Copiar Imagem</button>
             `;
             return container;
         }
 
-        function shareOnWhatsApp(index) {
+        function copyText(index) {
             const message = messages[index];
-            const encodedText = encodeURIComponent(message.text);
-            
-            // Aqui ajustamos para construir a URL completa com o domínio (supondo 'https://seusite.com')
-            const baseUrl = "https://granadoimoveis.vercel.app/"; // Substitua por seu domínio real
-            const encodedImage = encodeURIComponent(baseUrl + message.imageUrl); // Adiciona o domínio à imagem
+            const textArea = document.createElement('textarea');
+            textArea.value = message.text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            showCopyStatus('Texto copiado com sucesso!');
+        }
 
-            // Criar o link de compartilhamento para WhatsApp
-            const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedText}%0A%0A${encodedImage}`;
+        function copyImage(index) {
+            const message = messages[index];
+            const textArea = document.createElement('textarea');
+            textArea.value = message.imageUrl;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            showCopyStatus('Link da imagem copiado com sucesso!');
+        }
 
-            // Abrir o link no WhatsApp
-            window.open(whatsappUrl, '_blank');
+        function showCopyStatus(message) {
+            const status = document.getElementById('copy-status');
+            status.textContent = message;
+            setTimeout(() => status.textContent = '', 3000);
         }
 
         // Renderizar mensagens
