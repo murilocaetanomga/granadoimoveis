@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Copiar Mensagem com Imagem</title>
+    <title>Copiar Mensagem</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -68,40 +68,27 @@
             container.innerHTML = `
                 <img src="${message.imageUrl}" alt="Imagem ${index + 1}">
                 <p>${message.text}</p>
-                <button onclick="copyMessage(${index})">Copiar Mensagem e Imagem</button>
+                <button onclick="copyText('${message.text}')">Copiar Texto</button>
+                <button onclick="openImage('${message.imageUrl}')">Abrir Imagem</button>
             `;
             return container;
         }
 
-        async function copyMessage(index) {
-            const message = messages[index];
-            try {
-                // Fetch the image as a Blob
-                const response = await fetch(message.imageUrl);
-                if (!response.ok) throw new Error("Não foi possível carregar a imagem.");
-                const imageBlob = await response.blob();
-
-                // Cria um ClipboardItem com texto e imagem
-                const clipboardItems = [
-                    new ClipboardItem({
-                        'text/plain': new Blob([message.text], { type: 'text/plain' }),
-                        [imageBlob.type]: imageBlob
-                    })
-                ];
-
-                // Copia o conteúdo para a área de transferência
-                await navigator.clipboard.write(clipboardItems);
-
-                // Feedback para o usuário
+        function copyText(text) {
+            navigator.clipboard.writeText(text).then(() => {
                 const feedbackEl = document.getElementById('copyFeedback');
-                feedbackEl.textContent = 'Mensagem e imagem copiadas!';
+                feedbackEl.textContent = 'Texto copiado!';
                 setTimeout(() => {
                     feedbackEl.textContent = '';
                 }, 2000);
-            } catch (err) {
-                console.error('Erro ao copiar:', err);
-                alert('Não foi possível copiar a mensagem e a imagem. Verifique se seu navegador suporta essa funcionalidade.');
-            }
+            }).catch(err => {
+                console.error('Erro ao copiar texto:', err);
+                alert('Não foi possível copiar o texto.');
+            });
+        }
+
+        function openImage(imageUrl) {
+            window.open(imageUrl, '_blank');
         }
 
         // Render messages
